@@ -39,10 +39,12 @@ if [ -f "acpi-wake-fix.service" ]; then
     sudo systemctl enable --now acpi-wake-fix.service
     echo "✅ ACPI Fix Applied."
 fi
-# إنشاء مجلدات الربط لو مش موجودة
-sudo mkdir -p /mnt/Data /mnt/Windows
+
 # 4. إضافة بارتيشنات Windows و Data لـ fstab باستخدام ntfs3
 echo "💾 Preparing NTFS partitions with high-performance ntfs3 driver..."
+
+# إنشاء مجلدات الربط (مهم جداً)
+sudo mkdir -p /mnt/Data /mnt/Windows
 
 # تثبيت أداة الصيانة لضمان مسح الـ Dirty Bit
 sudo pacman -S ntfs-3g --noconfirm --needed
@@ -50,13 +52,10 @@ sudo pacman -S ntfs-3g --noconfirm --needed
 DATA_UUID="01DC54AD072198F0"
 WIN_UUID="106A13A76A13889C"
 
-# خيارات ntfs3 الاحترافية:
-# discard: مهم جداً لأن هاردك M.2 SSD (بيفعل خاصية TRIM لتحسين الأداء)
-# force: بيجبر النظام يفتح الهارد حتى لو فيه مشاكل بسيطة في القفل
-# prealloc: بيقلل تشتت الملفات وبيسرع الكتابة
+# خيارات ntfs3 الاحترافية
 MOUNT_OPTS="defaults,noauto,x-systemd.automount,uid=1000,gid=1000,fmask=0022,dmask=0022,windows_names,prealloc,discard,force"
 
-# تنظيف الهاردات برمجياً قبل الـ Mount (عشان نتفادى مشكلة الـ Force القديمة)
+# تنظيف الهاردات برمجياً قبل الـ Mount
 echo "🧹 Cleaning NTFS 'Dirty Bit' for Data and Windows..."
 sudo ntfsfix -d /dev/disk/by-uuid/$DATA_UUID 2>/dev/null
 sudo ntfsfix -d /dev/disk/by-uuid/$WIN_UUID 2>/dev/null
@@ -70,27 +69,22 @@ if ! grep -q "$WIN_UUID" /etc/fstab; then
 fi
 
 echo "🔄 Mounting partitions with ntfs3..."
-
 sudo mount -a
-# 5. سحب كل الخطوط من ويندوز (فلترة ذكية تمنع الـ Trash)
+
+# 5. سحب كل الخطوط من ويندوز
 echo "🔤 Harvesting ALL valid fonts from Windows (No Trash)..."
 mkdir -p ~/.local/share/fonts/WindowsFonts
 
-# 1. سحب من مجلد النظام الأساسي لويندوز
 if [ -d "/mnt/Windows/Windows/Fonts" ]; then
     echo "   -> Scanning System Fonts..."
     find /mnt/Windows/Windows/Fonts -type f -regextype posix-extended -iregex '.*\.(ttf|otf|ttc|fon|pfb|pfm|woff|woff2)$' -exec cp {} ~/.local/share/fonts/WindowsFonts/ 2>/dev/null \;
 fi
 
-# 2. سحب من مجلدات المستخدمين (AppData)
 if [ -d "/mnt/Windows/Users" ]; then
     echo "   -> Scanning Users AppData Fonts..."
     find /mnt/Windows/Users/*/AppData/Local/Microsoft/Windows/Fonts -type f -regextype posix-extended -iregex '.*\.(ttf|otf|ttc|fon|pfb|pfm|woff|woff2)$' -exec cp {} ~/.local/share/fonts/WindowsFonts/ 2>/dev/null \;
 fi
 
-# تحديث كاش الخطوط في لينكس
-echo "🔄 Updating Font Cache..."
 fc-cache -fv
 echo "✅ All clean Windows fonts successfully installed!"
-
 echo "🎉 Congratulations! Your system is fully automated and ready."
