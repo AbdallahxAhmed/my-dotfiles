@@ -1,0 +1,10 @@
+[Unit]
+Description=Fix ACPI wakeup issue
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c "echo GPP0 > /proc/acpi/wakeup"
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
