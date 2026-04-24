@@ -39,7 +39,8 @@ if [ -f "acpi-wake-fix.service" ]; then
     sudo systemctl enable --now acpi-wake-fix.service
     echo "✅ ACPI Fix Applied."
 fi
-
+# إنشاء مجلدات الربط لو مش موجودة
+sudo mkdir -p /mnt/Data /mnt/Windows
 # 4. إضافة بارتيشنات Windows و Data لـ fstab باستخدام ntfs3
 echo "💾 Preparing NTFS partitions with high-performance ntfs3 driver..."
 
