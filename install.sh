@@ -40,20 +40,36 @@ if [ -f "acpi-wake-fix.service" ]; then
     echo "✅ ACPI Fix Applied."
 fi
 
-# 4. إضافة بارتيشنات Windows و Data لـ fstab (System Level)
-echo "💾 Adding Windows and Data partitions to /etc/fstab..."
+# 4. إضافة بارتيشنات Windows و Data لـ fstab باستخدام ntfs3
+echo "💾 Preparing NTFS partitions with high-performance ntfs3 driver..."
+
+# تثبيت أداة الصيانة لضمان مسح الـ Dirty Bit
+sudo pacman -S ntfs-3g --noconfirm --needed
+
 DATA_UUID="01DC54AD072198F0"
 WIN_UUID="106A13A76A13889C"
-MOUNT_OPTS="defaults,noauto,x-systemd.automount,windows_names,uid=1000,gid=1000,umask=022"
+
+# خيارات ntfs3 الاحترافية:
+# discard: مهم جداً لأن هاردك M.2 SSD (بيفعل خاصية TRIM لتحسين الأداء)
+# force: بيجبر النظام يفتح الهارد حتى لو فيه مشاكل بسيطة في القفل
+# prealloc: بيقلل تشتت الملفات وبيسرع الكتابة
+MOUNT_OPTS="defaults,noauto,x-systemd.automount,uid=1000,gid=1000,fmask=0022,dmask=0022,windows_names,prealloc,discard,force"
+
+# تنظيف الهاردات برمجياً قبل الـ Mount (عشان نتفادى مشكلة الـ Force القديمة)
+echo "🧹 Cleaning NTFS 'Dirty Bit' for Data and Windows..."
+sudo ntfsfix -d /dev/disk/by-uuid/$DATA_UUID 2>/dev/null
+sudo ntfsfix -d /dev/disk/by-uuid/$WIN_UUID 2>/dev/null
 
 if ! grep -q "$DATA_UUID" /etc/fstab; then
-    echo "UUID=$DATA_UUID  /mnt/Data  ntfs-3g  $MOUNT_OPTS  0 0" | sudo tee -a /etc/fstab
+    echo "UUID=$DATA_UUID  /mnt/Data  ntfs3  $MOUNT_OPTS  0 0" | sudo tee -a /etc/fstab
 fi
 
 if ! grep -q "$WIN_UUID" /etc/fstab; then
-    echo "UUID=$WIN_UUID  /mnt/Windows  ntfs-3g  $MOUNT_OPTS  0 0" | sudo tee -a /etc/fstab
+    echo "UUID=$WIN_UUID  /mnt/Windows  ntfs3  $MOUNT_OPTS  0 0" | sudo tee -a /etc/fstab
 fi
-echo "🔄 Mounting newly added partitions..."
+
+echo "🔄 Mounting partitions with ntfs3..."
+
 sudo mount -a
 # 5. سحب كل الخطوط من ويندوز (فلترة ذكية تمنع الـ Trash)
 echo "🔤 Harvesting ALL valid fonts from Windows (No Trash)..."
