@@ -1,0 +1,56 @@
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": {
+        "type": "kitty",
+        "source": "~/Pictures/character.png", 
+        "width": 28,
+        "padding": {
+            "top": 2,
+            "left": 2,
+            "right": 5
+        }
+    },
+    "display": {
+        "separator": " \u001b[90m\u001b[0m ",
+        "key": {
+            "width": 11
+        }
+    },
+    "modules": [
+        "break",
+        {
+            "type": "custom",
+            "format": "\u001b[31m╭─ \u001b[1m\u001b[31m  Hardware\u001b[0m"
+        },
+        { "type": "host", "key": "\u001b[31m│  \u001b[31m󰌢 MBD", "format": "{2}" },
+        { "type": "cpu", "key": "\u001b[31m│  \u001b[31m󰻠 CPU", "temp": true },
+        { "type": "gpu", "key": "\u001b[31m│  \u001b[31m󰢮 GPU", "driverSpecific": true, "format": "{2} ({8} / {7}) - {4}", "temp": true },
+        { "type": "display", "key": "\u001b[31m│  \u001b[31m󰍹 DSP", "format": "{1}x{2} @ {3}Hz" },
+        { "type": "memory", "key": "\u001b[31m│  \u001b[31m󰍛 RAM", "format": "{1} / {2} ({3})" },
+        { "type": "swap", "key": "\u001b[31m│  \u001b[31m󰓡 SWP", "format": "{1} / {2} ({3})" },
+        { "type": "disk", "key": "\u001b[31m│  \u001b[31m󰋊 LNX", "folders": "/", "format": "{1} / {2} ({3})" },
+        { "type": "disk", "key": "\u001b[31m│  \u001b[31m󰋊 DTA", "folders": "/mnt/Data", "format": "{1} / {2} ({3})" },
+        { "type": "disk", "key": "\u001b[31m│  \u001b[31m󰋊 WIN", "folders": "/mnt/Windows", "format": "{1} / {2} ({3})" },
+        { "type": "localip", "key": "\u001b[31m│  \u001b[31m󰩟 NET", "showIpv6": false },
+        {
+            "type": "custom",
+            "format": "\u001b[33m├─ \u001b[1m\u001b[33m  Software\u001b[0m"
+        },
+        { "type": "os", "key": "\u001b[33m│  \u001b[33m󰣇 OS ", "format": "{2}" },
+        { "type": "kernel", "key": "\u001b[33m│  \u001b[33m KER", "format": "{2}" },
+        { "type": "uptime", "key": "\u001b[33m│  \u001b[33m󰅐 UPT" },
+        { "type": "packages", "key": "\u001b[33m│  \u001b[33m󰏖 PKG" },
+        { "type": "shell", "key": "\u001b[33m│  \u001b[33m󰈺 SHL" },
+        {
+            "type": "custom",
+            "format": "\u001b[36m├─ \u001b[1m\u001b[36m󰄛 Aesthetic\u001b[0m"
+        },
+        { "type": "de", "key": "\u001b[36m│  \u001b[36m󰖲 DE " },
+        { "type": "wm", "key": "\u001b[36m│  \u001b[36m󱂬 WM " },
+        { "type": "theme", "key": "\u001b[36m│  \u001b[36m󰉼 THM" },
+        { "type": "terminal", "key": "\u001b[36m│  \u001b[36m󰆍 TRM" },
+        { "type": "terminalfont", "key": "\u001b[36m╰─ \u001b[36m󰛖 FNT", "format": "{1}" },
+        "break",
+        { "type": "colors", "symbol": "circle" }
+    ]
+}
