@@ -4,7 +4,7 @@
 
 # 📂 الدليل الاحترافي لربط أقراص Windows و Data و Software (مخصصة لـ SSD)
 
-بما أن جميع الأقراص لديك من نوع **SSD**، تم تصميم هذه الإعدادات خصيصاً لتسريع الأداء وتقليل إهلاك الأقراص (Wear Leveling) من خلال تفعيل خاصية الـ TRIM بشكل مستمر `discard`، والمحافظة على سرعة إقلاع النظام.
+بما أن جميع الأقراص لديك من نوع **SSD**، تم تصميم هذه الإعدادات خصيصاً لتسريع الأداء وتقليل إهلاك الأقراص (Wear Leveling) من خلال تفعيل خاصية الـ TRIM بشكل مسار `discard`، والمحافظة على سرعة إقلاع النظام.
 
 ***
 
@@ -23,9 +23,9 @@ sudo nano /etc/fstab
 ```
 انسخ الأسطر التالية، والصقها في **نهاية الملف** كما هي بالضبط:
 ```plaintext
-UUID=01DC54AD072198F0  /mnt/Data      ntfs3  noauto,x-systemd.automount,uid=1000,gid=1000,fmask=0113,dmask=0002,windows_names,discard  0  0
-UUID=01DCD49EEFD3F900  /mnt/Windows   ntfs3  noauto,x-systemd.automount,uid=1000,gid=1000,fmask=0113,dmask=0002,windows_names,discard  0  0
-UUID=B6A2042DA203F0A3  /mnt/Software  ntfs3  noauto,x-systemd.automount,uid=1000,gid=1000,fmask=0113,dmask=0002,windows_names,discard  0  0
+UUID=01DC54AD072198F0  /mnt/Data      ntfs3  noauto,x-systemd.automount,user,uid=1000,gid=1000,fmask=0113,dmask=0002,windows_names,discard  0  0
+UUID=01DCD49EEFD3F900  /mnt/Windows   ntfs3  noauto,x-systemd.automount,user,uid=1000,gid=1000,fmask=0113,dmask=0002,windows_names,discard  0  0
+UUID=B6A2042DA203F0A3  /mnt/Software  ntfs3  noauto,x-systemd.automount,user,uid=1000,gid=1000,fmask=0113,dmask=0002,windows_names,discard  0  0
 ```
 *(احفظ الملف عبر `Ctrl+S` أو `Ctrl+O` ثم اخرج عبر `Ctrl+X` أو `Ctrl+Q` حسب المحرر الذي تستخدمه).* 
 
@@ -42,8 +42,9 @@ sudo mount -a
 
 *   **`ntfs3`:** لضمان استخدام أحدث تعريف للـ NTFS المدمج في نواة لينكس (أسرع بكثير من ntfs-3g القديم ويستهلك موارد أقل).
 *   **`noauto,x-systemd.automount`:** القرص لن يتم تركيبه في الخلفية أثناء إقلاع النظام لكي لا يبطئ الـ Boot (Fast Boot). سيتم التركيب تلقائياً في الجزء من الثانية الذي تفتح فيه المجلد.
+*   **`user`:** يسمح للمستخدم العادي بفتح وتركيب الأقراص من واجهة النظام (مثل Dolphin) بضغطة زر واحدة دون الحاجة لإدخال كلمة مرور الـ Root.
 *   **`uid=1000,gid=1000`:** يجعلك المالك الرسمي لكل الملفات، لتتمكن من التعديل والحذف بحرية دون المطالبة بكلمة مرور الـ Root.
-*   **`fmask=0113,dmask=0002`:** ترجمة ذكية للصلاحيات؛ تسمح لك بالقراءة والكتابة، لكن تمنع الملفات العادية (كالصور والفيديو) من الظهور كملفات "قابلة للتنفيذ" (Executable)، مما يحمي النظام ويحعله أكثر ترتيباً.
+*   **`fmask=0113,dmask=0002`:** ترجمة ذكية للصلاحيات؛ تسمح لك بالقراءة والكتابة، لكن تمنع الملفات العادية (كالصور والفيديو) من الظهور كملفات "قابلة للتنفيذ" (Executable)، مما يحمي النظام ويجعله أكثر ترتيباً.
 *   **`windows_names`:** يمنعك من إنشاء ملفات في لينكس بأسماء أو رموز ممنوعة في ويندوز (مثل `?` أو `*`) لتجنب تلف الملفات عند فتحها لاحقاً.
 *   **`discard`:** السحر الخاص بـ SSD؛ يرسل أوامر TRIM للقرص للحفاظ على سرعته وتقليل استهلاك الخلايا بمرور الوقت.
 
