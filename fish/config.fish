@@ -20,4 +20,3 @@ end
 # Run it on startup
 fastfetch
 
-alias boss-ultimate="sudo ~/boss_net.sh"
