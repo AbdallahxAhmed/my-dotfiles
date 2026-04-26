@@ -5,7 +5,7 @@
 ### المتطلبات المسبقة
 التأكد من تثبيت أداة التحويل الأساسية `win2xcur` (لمستخدمي Arch/CachyOS عبر AUR):
 ```bash
-yay -S win2xcur
+paru -S win2xcur
 ```
 
 ---
