@@ -65,3 +65,56 @@ echo "options nvidia NVreg_PreserveVideoMemoryAllocations=1" | sudo tee /etc/mod
 
 **باختصار:**
 الفكرة إن أوامر نظام التشغيل الأساسية واحدة (الـ Systemd والـ Modprobe)، لكن Fedora بتحتاج إنك تتدخل يدوياً لتعريف الـ Kernel بالتعديلات دي (Dracut)، وتتأكد من الحزم المفصولة، عكس CachyOS اللي بتعمل كتير من الخطوات دي أوتوماتيك في الخلفية بحكم هندستها.
+
+### أوامر جاهزة حسب التوزيعة (اعمل اللي يناسب نظامك)
+
+#### لو انت على Fedora
+
+1. تأكد إن حزمة الطاقة الخاصة بإنفيديا متسطبة:
+```bash
+sudo dnf install -y xorg-x11-drv-nvidia-power
+```
+
+2. فعّل خدمات Sleep/Hibernate/Resume:
+```bash
+sudo systemctl enable nvidia-suspend.service nvidia-hibernate.service nvidia-resume.service
+```
+
+3. أضف إعداد حفظ الذاكرة الرسومية:
+```bash
+echo "options nvidia NVreg_PreserveVideoMemoryAllocations=1" | sudo tee /etc/modprobe.d/nvidia-sleep.conf
+```
+
+4. حدّث الـ Initramfs (خطوة مهمة في Fedora):
+```bash
+sudo dracut -f
+```
+
+5. أعد التشغيل:
+```bash
+sudo reboot
+```
+
+#### لو انت على CachyOS / Arch
+
+1. ثبّت تعريف إنفيديا (اختار الحزمة المناسبة لكيرنلك):
+```bash
+sudo pacman -S --needed nvidia nvidia-utils
+```
+
+2. فعّل نفس خدمات NVIDIA:
+```bash
+sudo systemctl enable nvidia-suspend.service nvidia-hibernate.service nvidia-resume.service
+```
+
+3. أضف إعداد حفظ الذاكرة الرسومية:
+```bash
+echo "options nvidia NVreg_PreserveVideoMemoryAllocations=1" | sudo tee /etc/modprobe.d/nvidia-sleep.conf
+```
+
+4. في أغلب الحالات مش هتحتاج خطوة يدوية زي `dracut -f` لأن تحديث الـ initramfs بيتم تلقائي عبر hooks.
+
+5. أعد التشغيل:
+```bash
+sudo reboot
+```
