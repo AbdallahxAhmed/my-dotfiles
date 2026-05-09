@@ -112,9 +112,9 @@ sudo systemctl enable nvidia-suspend.service nvidia-hibernate.service nvidia-res
 echo "options nvidia NVreg_PreserveVideoMemoryAllocations=1" | sudo tee /etc/modprobe.d/nvidia-sleep.conf
 ```
 
-4. في أغلب الحالات مش هتحتاج خطوة يدوية زي `dracut -f` لأن تحديث الـ initramfs بيتم تلقائي عبر hooks.
+> ملاحظة: في أغلب الحالات مش هتحتاج خطوة يدوية زي `dracut -f` لأن تحديث الـ initramfs بيتم تلقائي عبر hooks.
 
-5. أعد التشغيل:
+4. أعد التشغيل:
 ```bash
 sudo reboot
 ```
