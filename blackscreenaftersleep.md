@@ -42,3 +42,79 @@ echo "options nvidia NVreg_PreserveVideoMemoryAllocations=1" | sudo tee /etc/mod
 * امسح المعجون القديم بمنديل وكحول، وحط نقطة معجون جديدة.
 
 طبق خطوة التيرمينال بتاعة NVIDIA الأول واعمل ريستارت، وطمني الجهاز قام من الـ Sleep ولا لسه بيعاند؟
+
+---
+
+### رابعاً: الفرق بين Fedora و CachyOS في تعريفات إنفيديا
+
+سؤال ممتاز جداً. الاختلاف بين توزيعات مبنية على Arch (زي CachyOS) وتوزيعات مبنية على Red Hat (زي Fedora) بيبان في فلسفة هندسة النظام والتعامل مع الكيرنل (Kernel).
+
+الخطوات اللي عملتها هنا في فيدورا وكانت مختلفة أو تعتبر "زيادة" عن اللي كنت متعود تعمله في CachyOS تتلخص في نقطتين تقنيتين:
+
+### 1. فصل حزم الطاقة (Package Splitting)
+
+* **في CachyOS (Arch):** لما بتثبت تعريف إنفيديا (غالباً حزمة `nvidia-utils` أو من خلال سكريبت التوزيعة)، كل ملفات الكارت بتنزل ككتلة واحدة، بما فيها سكريبتات الـ Sleep والـ Hibernate.
+* **في Fedora:** فلسفة التوزيعة إنها بتفكك الحزم الكبيرة عشان توفر مساحة وتعطي تحكم أكبر. فملفات إدارة الطاقة الخاصة بإنفيديا معزولة في حزمة لوحدها اسمها `xorg-x11-drv-nvidia-power`. عشان كده كان لازم نتأكد بالأمر إن الحزمة دي راكبة في النظام الأول قبل ما نفعل الـ Services.
+
+### 2. إعادة بناء الـ Initramfs يدوياً (`dracut -f`)
+
+وهي دي الخطوة الأهم والأكبر كفرق بين النظامين:
+
+* **في CachyOS (Arch):** النظام بيعتمد على أدوات زي `mkinitcpio` أو `booster`. مدير الحزم (Pacman) بيكون جواه Hooks بتشتغل في الخلفية وتعمل تحديث أوتوماتيك للـ Boot Image، أو حتى التوزيعة نفسها بتبقى حاطة الـ parameters دي بشكل افتراضي عشان هي توزيعة موجهة للأداء العالي والألعاب.
+* **في Fedora:** النظام بيستخدم أداة اسمها `dracut` لإنشاء الـ Initramfs (الصورة المصغرة اللي الكيرنل بيحملها في الرامات وقت الإقلاع). لما بتعمل تعديل يدوي في ملفات إعدادات الكيرنل زي `/etc/modprobe.d/`، فيدورا مش بتحدث الـ Initramfs من نفسها. كان لازم تكتب `sudo dracut -f` عشان تجبر النظام إنه يفك ملفات الإقلاع، يضيف الأمر بتاع إنفيديا الجديد، ويقفلها تاني. بدون الخطوة دي، الكيرنل كان هيتجاهل الملف اللي كتبناه لحد ما ييجي تحديث جديد للكيرنل.
+
+**باختصار:**
+الفكرة إن أوامر نظام التشغيل الأساسية واحدة (الـ Systemd والـ Modprobe)، لكن Fedora بتحتاج إنك تتدخل يدوياً لتعريف الـ Kernel بالتعديلات دي (Dracut)، وتتأكد من الحزم المفصولة، عكس CachyOS اللي بتعمل كتير من الخطوات دي أوتوماتيك في الخلفية بحكم هندستها.
+
+### أوامر جاهزة حسب التوزيعة (اعمل اللي يناسب نظامك)
+
+#### لو انت على Fedora
+
+1. تأكد إن حزمة الطاقة الخاصة بإنفيديا متسطبة:
+```bash
+sudo dnf install -y xorg-x11-drv-nvidia-power
+```
+
+2. فعّل خدمات Sleep/Hibernate/Resume:
+```bash
+sudo systemctl enable nvidia-suspend.service nvidia-hibernate.service nvidia-resume.service
+```
+
+3. أضف إعداد حفظ الذاكرة الرسومية:
+```bash
+echo "options nvidia NVreg_PreserveVideoMemoryAllocations=1" | sudo tee /etc/modprobe.d/nvidia-sleep.conf
+```
+
+4. حدّث الـ Initramfs (خطوة مهمة في Fedora):
+```bash
+sudo dracut -f
+```
+
+5. أعد التشغيل:
+```bash
+sudo reboot
+```
+
+#### لو انت على CachyOS / Arch
+
+1. ثبّت تعريف إنفيديا (اختار الحزمة المناسبة لكيرنلك):
+```bash
+sudo pacman -S --needed nvidia nvidia-utils
+```
+
+2. فعّل نفس خدمات NVIDIA:
+```bash
+sudo systemctl enable nvidia-suspend.service nvidia-hibernate.service nvidia-resume.service
+```
+
+3. أضف إعداد حفظ الذاكرة الرسومية:
+```bash
+echo "options nvidia NVreg_PreserveVideoMemoryAllocations=1" | sudo tee /etc/modprobe.d/nvidia-sleep.conf
+```
+
+> ملاحظة: في أغلب الحالات مش هتحتاج خطوة يدوية زي `dracut -f` لأن تحديث الـ initramfs بيتم تلقائي عبر hooks.
+
+4. أعد التشغيل:
+```bash
+sudo reboot
+```
